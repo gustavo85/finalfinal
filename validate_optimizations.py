@@ -106,6 +106,20 @@ def check_optimization_implementations():
             'GameProfiler',  # Auto-tuning profiler
             'GameProfile',
         ],
+        'optimizaciones_sistema.py': [
+            'aplicar_todas_optimizaciones_sistema',  # Orchestration function
+            'programar_optimizaciones_automaticas',  # Scheduling function
+            'optimizar_sysmain_inteligente',  # Optimization 1
+            'optimizar_windows_search',  # Optimization 2
+            'optimizar_trim_ssd',  # Optimization 3
+            'configurar_desfragmentacion_inteligente',  # Optimization 4
+            'optimizar_archivo_paginacion',  # Optimization 5
+            'optimizar_estados_procesador',  # Optimization 6
+            'habilitar_gpu_scheduling',  # Optimization 7
+            'optimizar_adaptadores_red',  # Optimization 8
+            'optimizar_puntos_restauracion',  # Optimization 9
+            'optimizar_windows_update',  # Optimization 10
+        ],
     }
     
     print("\nVerificando implementaciones de optimizaciones...")
@@ -165,6 +179,7 @@ def validate_all():
         'optimization_checkpoint.py',
         'game_profiler.py',
         'integration_example.py',
+        'optimizaciones_sistema.py',
     ]
     
     syntax_ok = True
@@ -188,6 +203,9 @@ def validate_all():
     doc_files = [
         'README.md',
         'OPTIMIZATION_SUGGESTIONS.md',
+        'OPTIMIZACIONES_SISTEMA.md',
+        'OPTIMIZACIONES_CODIGO.md',
+        'IMPLEMENTATION_SUMMARY.md',
         'FEATURES_AND_COMPARISON.md',
         'ADVANCED_MODULES_README.md',
     ]

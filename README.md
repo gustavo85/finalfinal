@@ -121,6 +121,30 @@ Gaming Optimizer is a comprehensive Windows optimization tool designed to maximi
 - System tray integration
 - Dark neon theme
 
+#### 11. **Automated System Optimizations** (NEW in v7.5)
+- **10 Automatic System Optimizations** executed without manual intervention:
+  1. **SysMain/Superfetch Intelligence**: Adapts to SSD/HDD for optimal prefetching
+  2. **Windows Search Indexing**: Reduces CPU usage and excludes temporary folders
+  3. **TRIM for SSDs**: Enables and schedules weekly TRIM operations
+  4. **Intelligent Defragmentation**: HDD monthly defrag, SSD TRIM-only
+  5. **Dynamic Page File**: Optimizes based on RAM (2GB fixed for 16GB+ RAM)
+  6. **Processor Power States**: Maximizes C-state/P-state for gaming performance
+  7. **Hardware-Accelerated GPU Scheduling**: Enables on Windows 10 2004+
+  8. **Network Adapter Optimization**: Buffers, RSS, power management
+  9. **Restore Points Management**: Configures optimal space usage (2% SSD, 5% HDD)
+  10. **Windows Update Optimization**: Schedules updates 3-6 AM, limits bandwidth
+- **Orchestration Functions**: Apply all at once with `aplicar_todas_optimizaciones_sistema()`
+- **Automatic Scheduling**: Daily, weekly, and monthly maintenance tasks
+- **Safe Execution**: Requires admin privileges and Windows-only checks
+
+#### 12. **Advanced Performance Capabilities** (NEW in v7.5)
+- **CPU Cache Optimization**: Working set tuning for game processes
+- **Quantum Length Adjustment**: Optimized scheduler quantum for reduced context switching
+- **Thermal Monitoring**: Automatic adjustment based on CPU/GPU temperatures
+- **Performance Analytics**: Local telemetry with FPS tracking and session analysis
+- **Checkpoint/Rollback System**: Create system snapshots before optimizations
+- **Game Profiling**: Auto-detect game characteristics and apply custom optimizations
+
 ---
 
 ## 📋 System Requirements
