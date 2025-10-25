@@ -425,8 +425,8 @@ def cargar_config():
     Carga la configuración desde config.json con caché.
     Retorna:
         - lista_blanca: procesos ignorados en ajustes de prioridad
-        - lista_juegos: lista de juegos
-        - ignorar: procesos que NO se deben cerrar por inactividad
+        - ignorar: procesos que NO se deben cerrar por inactividad  
+        - lista_juegos: lista de juegos (no utilizada en este modo)
     """
     global _config_cache, _config_mtime
     
