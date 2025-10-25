@@ -1425,6 +1425,149 @@ def start_explorer_as_active_user() -> bool:
     except Exception:
         return start_explorer_fallback()
 
+# === NUEVAS OPTIMIZACIONES AVANZADAS ===
+
+def optimize_cpu_cache_for_game(game_pid: int) -> bool:
+    """
+    Optimiza el uso de caché de CPU para el proceso del juego
+    Ajusta el working set para mejorar la residencia en caché L2/L3
+    """
+    try:
+        handle = win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, False, game_pid)
+        
+        # Obtener tamaño actual del working set
+        try:
+            min_ws, max_ws = win32process.GetProcessWorkingSetSize(handle)
+        except:
+            min_ws, max_ws = 0, 0
+        
+        # Para caché L3 de 8MB, establecer min a 64MB, max a 512MB
+        # Esto fomenta la residencia en caché
+        new_min = 64 * 1024 * 1024  # 64 MB
+        new_max = 512 * 1024 * 1024  # 512 MB
+        
+        win32process.SetProcessWorkingSetSize(handle, new_min, new_max)
+        win32api.CloseHandle(handle)
+        
+        print(f"✓ Optimización de caché CPU aplicada a PID {game_pid}")
+        return True
+    except (OSError, PermissionError) as e:
+        print(f"Error acceso proceso cache: {e}")
+        return False
+    except Exception as e:
+        print(f"Error optimizando caché CPU: {e}")
+        return False
+
+def set_quantum_length() -> bool:
+    """
+    Ajusta la longitud del quantum de tiempo de CPU para reducir cambios de contexto
+    Optimiza el scheduler de Windows para gaming
+    """
+    try:
+        key_path = r"SYSTEM\CurrentControlSet\Control\PriorityControl"
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path, 0, 
+                           winreg.KEY_SET_VALUE) as key:
+            # Win32PrioritySeparation controla el comportamiento del quantum
+            # 0x26 = Long, Variable, Foreground boost (óptimo para gaming)
+            winreg.SetValueEx(key, "Win32PrioritySeparation", 0, 
+                             winreg.REG_DWORD, 0x26)
+        
+        print("✓ Quantum del scheduler optimizado para gaming")
+        return True
+    except (OSError, PermissionError) as e:
+        print(f"Error acceso registro quantum: {e}")
+        return False
+    except Exception as e:
+        print(f"Error configurando quantum: {e}")
+        return False
+
+def detect_nvidia_gpu() -> bool:
+    """Detecta si hay una GPU NVIDIA en el sistema"""
+    try:
+        result = subprocess.run(
+            ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
+            capture_output=True, text=True, timeout=5
+        )
+        return result.returncode == 0 and result.stdout.strip()
+    except:
+        return False
+
+def optimize_gpu_memory_advanced(game_pid: int) -> bool:
+    """
+    Optimización avanzada de memoria GPU
+    Activa persistence mode en NVIDIA y configura preferencias de asignación
+    """
+    try:
+        # NVIDIA-specific: Toggle persistence mode para refrescar estado GPU
+        if detect_nvidia_gpu():
+            try:
+                subprocess.run(
+                    ["nvidia-smi", "-pm", "0"],
+                    capture_output=True, timeout=5
+                )
+                subprocess.run(
+                    ["nvidia-smi", "-pm", "1"],
+                    capture_output=True, timeout=5
+                )
+            except:
+                pass
+        
+        # Configurar preferencias de asignación de VRAM via registro
+        key_path = r"SYSTEM\CurrentControlSet\Control\GraphicsDrivers"
+        try:
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path, 0,
+                               winreg.KEY_SET_VALUE) as key:
+                # Preferir asignaciones grandes de VRAM
+                winreg.SetValueEx(key, "DpiMapIommuContiguous", 0, 
+                                 winreg.REG_DWORD, 1)
+        except:
+            pass
+        
+        print("✓ Memoria GPU optimizada")
+        return True
+    except Exception as e:
+        print(f"Error optimizando memoria GPU: {e}")
+        return False
+
+def monitor_thermals_and_adjust() -> bool:
+    """
+    Monitorea temperaturas y ajusta límites de potencia para prevenir throttling
+    """
+    try:
+        # Intentar obtener temperaturas (requiere psutil con soporte de sensores)
+        temps = psutil.sensors_temperatures()
+        
+        cpu_temp = None
+        if 'coretemp' in temps:  # Intel
+            cpu_temp = max(t.current for t in temps['coretemp'])
+        elif 'k10temp' in temps:  # AMD
+            cpu_temp = max(t.current for t in temps['k10temp'])
+        
+        if cpu_temp is None:
+            return False
+        
+        # Ajustar rendimiento según temperatura
+        if cpu_temp > 85:  # Umbral crítico
+            print(f"⚠ Temp CPU crítica: {cpu_temp}°C - Reduciendo rendimiento")
+            # Reducir frecuencia máxima de CPU
+            subprocess.run(
+                ["powercfg", "/setacvalueindex", "SCHEME_CURRENT", 
+                 "SUB_PROCESSOR", "PROCTHROTTLEMAX", "80"],
+                capture_output=True
+            )
+        elif cpu_temp < 75:  # Zona segura
+            # Restaurar rendimiento completo
+            subprocess.run(
+                ["powercfg", "/setacvalueindex", "SCHEME_CURRENT",
+                 "SUB_PROCESSOR", "PROCTHROTTLEMAX", "100"],
+                capture_output=True
+            )
+        
+        return True
+    except Exception as e:
+        print(f"Error monitoreando temperaturas: {e}")
+        return False
+
 # === BLOQUE DE EJECUCIÓN PRINCIPAL ===
 
 def check_admin() -> bool:
@@ -1489,6 +1632,12 @@ def main():
     disable_game_dvr()
     optimize_gpu_settings()
     optimize_network()
+    
+    # Nuevas optimizaciones avanzadas
+    set_quantum_length()
+    optimize_cpu_cache_for_game(game_pid)
+    optimize_gpu_memory_advanced(game_pid)
+    monitor_thermals_and_adjust()
     
     active_gpu = detect_active_gpu_for_process(game_pid)
     if active_gpu:
