@@ -422,11 +422,11 @@ _config_mtime = 0
 
 def cargar_config():
     """
-    Carga la configuración del archivo config.json con caché.
+    Carga la configuración desde config.json con caché.
     Retorna:
-        - lista_blanca: procesos que NO reciben ajustes de prioridad
-        - lista_ignorados: procesos que NO se cierran por inactividad
-        - lista_juegos: procesos de juegos
+        - lista_blanca: procesos ignorados en ajustes de prioridad
+        - lista_ignorados: procesos que NO se deben cerrar por inactividad
+        - lista_juegos: lista de juegos
     """
     global _config_cache, _config_mtime
     
