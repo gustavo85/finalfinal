@@ -55,13 +55,13 @@ def check_shutdown_signal():
         with open(STATE_FILE, "r", encoding="utf-8") as f:
             state = json.load(f)
             return state.get("state") == "game"
-    except:
+    except (FileNotFoundError, json.JSONDecodeError, KeyError):
         return False
 
 def es_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
-    except:
+    except (AttributeError, OSError):
         return False
 
 def solicitar_admin():
