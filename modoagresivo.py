@@ -55,13 +55,13 @@ def check_shutdown_signal():
         with open(STATE_FILE, "r", encoding="utf-8") as f:
             state = json.load(f)
             return state.get("state") == "game"
-    except:
+    except (FileNotFoundError, json.JSONDecodeError, KeyError):
         return False
 
 def es_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
-    except:
+    except (AttributeError, OSError):
         return False
 
 def solicitar_admin():
@@ -416,24 +416,43 @@ def monitor_energia():
         except:
             time.sleep(30)
 
+# Config cache for optimization
+_config_cache = None
+_config_mtime = 0
+
 def cargar_config():
     """
-    Carga la configuración desde config.json
+    Carga la configuración desde config.json con caché.
     Retorna:
         - lista_blanca: procesos ignorados en ajustes de prioridad
         - lista_juegos: lista de juegos
         - ignorar: procesos que NO se deben cerrar por inactividad
     """
+    global _config_cache, _config_mtime
+    
     if not os.path.exists(NOMBRE_ARCHIVO_CONFIG):
         return set(), set(), set()
+    
     try:
-        with open(NOMBRE_ARCHIVO_CONFIG, "r") as f:
-            datos = json.load(f)
-            lista_blanca = set(item.lower() for item in datos.get("lista_blanca", []))
-            lista_juegos = set(item.lower() for item in datos.get("juegos", []))
-            ignorar = set(item.lower() for item in datos.get("ignorar", []))
-            return lista_blanca, lista_juegos, ignorar
-    except:
+        current_mtime = os.path.getmtime(NOMBRE_ARCHIVO_CONFIG)
+        if _config_cache is None or current_mtime > _config_mtime:
+            with open(NOMBRE_ARCHIVO_CONFIG, "r") as f:
+                datos = json.load(f)
+                _config_cache = datos
+                _config_mtime = current_mtime
+        
+        lista_blanca = set(item.lower() for item in _config_cache.get("lista_blanca", []))
+        lista_juegos = set(item.lower() for item in _config_cache.get("juegos", []))
+        ignorar = set(item.lower() for item in _config_cache.get("ignorar", []))
+        return lista_blanca, lista_juegos, ignorar
+    except (IOError, OSError, PermissionError) as e:
+        print(f"Error de archivo config: {e}")
+        return set(), set(), set()
+    except json.JSONDecodeError as e:
+        print(f"Error JSON en config: {e}")
+        return set(), set(), set()
+    except Exception as e:
+        print(f"Error inesperado cargando config: {e}")
         return set(), set(), set()
 
 def obtener_pid_primer_plano():
