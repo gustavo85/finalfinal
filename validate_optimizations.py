@@ -81,6 +81,7 @@ def check_optimization_implementations():
             'PowerShellSession',  # NEW: PowerShell connection pooling
             'get_ps_session',  # NEW: PowerShell session getter
             'optimize_io_scheduler',  # NEW: I/O scheduler optimization
+            'def close(self):',  # PowerShell session cleanup
         ],
         'COPIA.py': [
             'ThreadPoolExecutor',  # Batch registry operations

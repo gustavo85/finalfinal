@@ -1855,6 +1855,12 @@ def main():
     reiniciar_servicios(state.services_stopped)
     # No se reinician procesos para no interrumpir al usuario.
     
+    # Cleanup: Close PowerShell session if it was used
+    global _ps_session
+    if _ps_session is not None:
+        _ps_session.close()
+        _ps_session = None
+    
     notify_game_mode_end()
     
     # Restaura el modo anterior (normal/agresivo) si estaba configurado
