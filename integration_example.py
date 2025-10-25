@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 integration_example.py - Ejemplo de cómo integrar los nuevos módulos avanzados
-Demuestra el uso de analytics, checkpoints y auto-tuning juntos
+Demuestra el uso de analytics, checkpoints, auto-tuning y optimizaciones de sistema juntos
 """
 
 import time
@@ -116,6 +116,77 @@ def optimize_game_with_advanced_features(game_pid: int, game_name: str):
     return True
 
 
+def demo_system_optimizations():
+    """Demuestra las optimizaciones automáticas del sistema (v7.5)"""
+    
+    print("\n" + "="*60)
+    print("  DEMO: OPTIMIZACIONES AUTOMÁTICAS DEL SISTEMA (v7.5)")
+    print("="*60 + "\n")
+    
+    print("NOTA: Las optimizaciones de sistema requieren privilegios de")
+    print("      administrador y sistema operativo Windows.\n")
+    
+    try:
+        from optimizaciones_sistema import (
+            verificar_requisitos,
+            aplicar_todas_optimizaciones_sistema,
+            programar_optimizaciones_automaticas
+        )
+        
+        print("Módulo de optimizaciones de sistema importado correctamente.\n")
+        
+        # Verificar requisitos
+        print("Verificando requisitos del sistema...")
+        if not verificar_requisitos():
+            print("✗ No se cumplen los requisitos (Windows + Admin)")
+            print("  Esta demo solo muestra las funciones disponibles.\n")
+            
+            print("Funciones de optimización disponibles:")
+            print("  1. optimizar_sysmain_inteligente() - SysMain adaptativo SSD/HDD")
+            print("  2. optimizar_windows_search() - Reduce CPU de indexación")
+            print("  3. optimizar_trim_ssd() - TRIM semanal para SSDs")
+            print("  4. configurar_desfragmentacion_inteligente() - HDD/SSD auto")
+            print("  5. optimizar_archivo_paginacion() - Pagefile dinámico según RAM")
+            print("  6. optimizar_estados_procesador() - C/P-states para gaming")
+            print("  7. habilitar_gpu_scheduling() - Hardware GPU scheduling")
+            print("  8. optimizar_adaptadores_red() - Buffers, RSS, sin ahorro energía")
+            print("  9. optimizar_puntos_restauracion() - Gestión espacio disco")
+            print("  10. optimizar_windows_update() - Horarios y bandwidth\n")
+            
+            print("Funciones de orquestación:")
+            print("  - aplicar_todas_optimizaciones_sistema()")
+            print("  - programar_optimizaciones_automaticas()\n")
+            
+            print("Para ejecutar en producción:")
+            print("  python optimizaciones_sistema.py --aplicar-todo")
+            print("  python optimizaciones_sistema.py --programar\n")
+            
+        else:
+            print("✓ Requisitos cumplidos. Se pueden aplicar optimizaciones.\n")
+            
+            # Preguntar al usuario
+            respuesta = input("¿Desea aplicar todas las optimizaciones ahora? (s/n): ")
+            if respuesta.lower() == 's':
+                print("\nAplicando optimizaciones del sistema...")
+                exito, resultados = aplicar_todas_optimizaciones_sistema()
+                
+                if exito:
+                    print("\n✓ Todas las optimizaciones aplicadas exitosamente")
+                else:
+                    print("\n⚠ Algunas optimizaciones fallaron, vea el log")
+                
+                # Preguntar sobre programación
+                respuesta = input("\n¿Desea programar optimizaciones automáticas? (s/n): ")
+                if respuesta.lower() == 's':
+                    programar_optimizaciones_automaticas()
+            else:
+                print("Optimizaciones no aplicadas.")
+                
+    except ImportError as e:
+        print(f"✗ No se pudo importar módulo de optimizaciones: {e}")
+        print("  Asegúrese de que optimizaciones_sistema.py existe.\n")
+
+
 def demo_standalone_features():
     """Demuestra características individuales de cada módulo"""
     
@@ -174,7 +245,7 @@ def demo_standalone_features():
 if __name__ == "__main__":
     import sys
     
-    print("Gaming Optimizer - Demostración de Características Avanzadas")
+    print("Gaming Optimizer v7.5 OPTIMIZED - Demostración de Características Avanzadas")
     print("="*60)
     
     # Verificar si hay un argumento de PID de juego
@@ -187,11 +258,16 @@ if __name__ == "__main__":
         else:
             print(f"Error: PID {game_pid} no existe")
     else:
-        print("\nNo se proporcionó PID de juego, ejecutando demos standalone...\n")
+        print("\nNo se proporcionó PID de juego, ejecutando demos...\n")
         print("Uso: python integration_example.py <PID> <nombre_juego>")
         print("Ejemplo: python integration_example.py 1234 valorant.exe\n")
         
+        # Ejecutar demo de optimizaciones de sistema
+        demo_system_optimizations()
+        
+        # Ejecutar demos standalone
         demo_standalone_features()
     
     print("\nPara uso en producción, integre estas funciones en modojuego.py")
     print("Vea ADVANCED_MODULES_README.md para más detalles.\n")
+
