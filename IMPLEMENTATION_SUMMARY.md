@@ -177,19 +177,19 @@ Este documento resume todas las optimizaciones e implementaciones realizadas seg
 
 ## Archivos Nuevos Creados
 
-1. **`performance_analytics.py`** (253 líneas)
+1. **`performance_analytics.py`** (224 líneas)
    - Sistema de análisis de rendimiento local
 
-2. **`optimization_checkpoint.py`** (318 líneas)
+2. **`optimization_checkpoint.py`** (256 líneas)
    - Sistema de checkpoint/rollback
 
-3. **`game_profiler.py`** (358 líneas)
+3. **`game_profiler.py`** (300 líneas)
    - Perfilador automático de juegos
 
-4. **`integration_example.py`** (228 líneas)
+4. **`integration_example.py`** (197 líneas)
    - Ejemplo de integración de todos los módulos
 
-5. **`validate_optimizations.py`** (211 líneas)
+5. **`validate_optimizations.py`** (226 líneas)
    - Script de validación de implementaciones
 
 6. **`ADVANCED_MODULES_README.md`**
