@@ -757,7 +757,7 @@ def monitorear_y_terminar_inactivos(lista_ignorados):
                                     daemon=True
                                 ).start()
                                 
-                                if pid_representante en procesos_inactivos:
+                                if pid_representante in procesos_inactivos:
                                     del procesos_inactivos[pid_representante]
                     else:
                         if pid_representante in procesos_inactivos:
