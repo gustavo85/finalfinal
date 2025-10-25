@@ -461,10 +461,14 @@ def optimize_gpu_memory(game_pid):
     Trigger GPU memory cleanup and set allocation preferences
     """
     try:
-        # NVIDIA-specific: Use nvidia-smi to reset allocations
+        # NVIDIA-specific: Toggle persistence mode to refresh GPU state
         if detect_nvidia_gpu():
             subprocess.run(
-                ["nvidia-smi", "--gpu-reset"],
+                ["nvidia-smi", "-pm", "0"],
+                capture_output=True, timeout=5
+            )
+            subprocess.run(
+                ["nvidia-smi", "-pm", "1"],
                 capture_output=True, timeout=5
             )
         
