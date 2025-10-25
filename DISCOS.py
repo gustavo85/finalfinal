@@ -14,6 +14,14 @@ from pathlib import Path
 from typing import List, Tuple, Dict, Optional
 import winreg
 
+# Pre-compile regex patterns for better performance
+FRAGMENTATION_PATTERNS = [
+    re.compile(r'(\d+)%.*fragment', re.IGNORECASE),
+    re.compile(r'Total fragmented.*?(\d+)%', re.IGNORECASE),
+    re.compile(r'Fragmented.*?(\d+)%', re.IGNORECASE)
+]
+LAST_OPTIMIZED_PATTERN = re.compile(r'LastOptimized:(\d+) days ago')
+
 class StorageMaintenanceApp:
     def __init__(self):
         """Inicializa la aplicación de mantenimiento de almacenamiento"""
@@ -436,7 +444,7 @@ class StorageMaintenanceApp:
                 return True, "Nunca se ha optimizado"
             
             # Buscar días desde última optimización
-            match = re.search(r'LastOptimized:(\d+) days ago', output)
+            match = LAST_OPTIMIZED_PATTERN.search(output)
             if match:
                 days = int(match.group(1))
                 if days > 30:
@@ -476,15 +484,9 @@ class StorageMaintenanceApp:
             
             output = result.stdout + result.stderr
             
-            # Buscar porcentaje de fragmentación
-            fragmentation_patterns = [
-                r'(\d+)%.*fragment',
-                r'Total fragmented.*?(\d+)%',
-                r'Fragmented.*?(\d+)%'
-            ]
-            
-            for pattern in fragmentation_patterns:
-                match = re.search(pattern, output, re.IGNORECASE)
+            # Buscar porcentaje de fragmentación usando patrones pre-compilados
+            for pattern in FRAGMENTATION_PATTERNS:
+                match = pattern.search(output)
                 if match:
                     frag_percent = int(match.group(1))
                     if frag_percent > 10:

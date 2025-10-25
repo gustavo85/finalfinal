@@ -7,6 +7,7 @@ import ctypes
 import json
 import shutil
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class BackupApp:
     def __init__(self, root):
@@ -109,6 +110,25 @@ class BackupApp:
             return True
         except:
             return False
+    
+    def batch_registry_export(self, exports_list, backup_dir):
+        """
+        Exports multiple registry keys in parallel for faster backup
+        exports_list: [(key_path, filename), ...]
+        """
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = []
+            for key_path, filename in exports_list:
+                command = f'reg export "{key_path}" "{os.path.join(backup_dir, filename)}" /y'
+                future = executor.submit(self.run_command, command)
+                futures.append(future)
+            
+            # Wait for all exports to complete
+            for future in as_completed(futures):
+                try:
+                    future.result()
+                except:
+                    pass
 
     def backup_drivers(self, backup_dir):
         drivers_dir = os.path.join(backup_dir, "drivers")
@@ -174,31 +194,39 @@ class BackupApp:
                 (r'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run', 'startup_user_run.reg'),
                 (r'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce', 'startup_user_runonce.reg'),
             ]
-            for key, filename in startup_keys:
-                self.run_command(f'reg export "{key}" "{os.path.join(backup_dir, filename)}" /y')
+            self.batch_registry_export(startup_keys, backup_dir)
         except:
             pass
-
+    
     def backup_taskbar_settings(self, backup_dir):
         try:
-            self.run_command(f'reg export "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Taskband" "{os.path.join(backup_dir, "taskbar_taskband.reg")}" /y')
-            self.run_command(f'reg export "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced" "{os.path.join(backup_dir, "explorer_advanced.reg")}" /y')
-            self.run_command(f'reg export "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StuckRects3" "{os.path.join(backup_dir, "taskbar_position.reg")}" /y')
+            taskbar_keys = [
+                (r'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband', 'taskbar_taskband.reg'),
+                (r'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', 'explorer_advanced.reg'),
+                (r'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3', 'taskbar_position.reg'),
+            ]
+            self.batch_registry_export(taskbar_keys, backup_dir)
         except:
             pass
-
+    
     def backup_file_associations(self, backup_dir):
         try:
-            self.run_command(f'reg export "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts" "{os.path.join(backup_dir, "file_associations.reg")}" /y')
-            self.run_command(f'reg export "HKLM\\SOFTWARE\\Classes" "{os.path.join(backup_dir, "file_classes_system.reg")}" /y')
+            file_keys = [
+                (r'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts', 'file_associations.reg'),
+                (r'HKLM\SOFTWARE\Classes', 'file_classes_system.reg'),
+            ]
+            self.batch_registry_export(file_keys, backup_dir)
         except:
             pass
-
+    
     def backup_desktop_settings(self, backup_dir):
         try:
-            self.run_command(f'reg export "HKCU\\Control Panel\\Desktop" "{os.path.join(backup_dir, "desktop_settings.reg")}" /y')
-            self.run_command(f'reg export "HKCU\\Control Panel\\Colors" "{os.path.join(backup_dir, "desktop_colors.reg")}" /y')
-            self.run_command(f'reg export "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes" "{os.path.join(backup_dir, "themes.reg")}" /y')
+            desktop_keys = [
+                (r'HKCU\Control Panel\Desktop', 'desktop_settings.reg'),
+                (r'HKCU\Control Panel\Colors', 'desktop_colors.reg'),
+                (r'HKCU\Software\Microsoft\Windows\CurrentVersion\Themes', 'themes.reg'),
+            ]
+            self.batch_registry_export(desktop_keys, backup_dir)
         except:
             pass
 
@@ -210,23 +238,32 @@ class BackupApp:
 
     def backup_mouse_keyboard(self, backup_dir):
         try:
-            self.run_command(f'reg export "HKCU\\Control Panel\\Mouse" "{os.path.join(backup_dir, "mouse_settings.reg")}" /y')
-            self.run_command(f'reg export "HKCU\\Control Panel\\Keyboard" "{os.path.join(backup_dir, "keyboard_settings.reg")}" /y')
-            self.run_command(f'reg export "HKCU\\Control Panel\\Accessibility" "{os.path.join(backup_dir, "accessibility.reg")}" /y')
+            input_keys = [
+                (r'HKCU\Control Panel\Mouse', 'mouse_settings.reg'),
+                (r'HKCU\Control Panel\Keyboard', 'keyboard_settings.reg'),
+                (r'HKCU\Control Panel\Accessibility', 'accessibility.reg'),
+            ]
+            self.batch_registry_export(input_keys, backup_dir)
         except:
             pass
-
+    
     def backup_sound_settings(self, backup_dir):
         try:
-            self.run_command(f'reg export "HKCU\\AppEvents\\Schemes" "{os.path.join(backup_dir, "sound_schemes.reg")}" /y')
-            self.run_command(f'reg export "HKCU\\Software\\Microsoft\\Multimedia\\Audio" "{os.path.join(backup_dir, "audio_settings.reg")}" /y')
+            sound_keys = [
+                (r'HKCU\AppEvents\Schemes', 'sound_schemes.reg'),
+                (r'HKCU\Software\Microsoft\Multimedia\Audio', 'audio_settings.reg'),
+            ]
+            self.batch_registry_export(sound_keys, backup_dir)
         except:
             pass
-
+    
     def backup_windows_update(self, backup_dir):
         try:
-            self.run_command(f'reg export "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate" "{os.path.join(backup_dir, "windows_update.reg")}" /y')
-            self.run_command(f'reg export "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate" "{os.path.join(backup_dir, "windows_update_policies.reg")}" /y')
+            update_keys = [
+                (r'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate', 'windows_update.reg'),
+                (r'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate', 'windows_update_policies.reg'),
+            ]
+            self.batch_registry_export(update_keys, backup_dir)
         except:
             pass
 

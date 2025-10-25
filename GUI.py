@@ -11,12 +11,20 @@ import importlib
 import runpy
 from pathlib import Path
 
-try:
-    from pystray import Icon, Menu, MenuItem
-    from PIL import Image, ImageDraw
-    PYSTRAY_AVAILABLE = True
-except ImportError:
-    PYSTRAY_AVAILABLE = False
+# Lazy import for pystray and PIL to reduce startup time
+PYSTRAY_AVAILABLE = None
+
+def get_pystray_modules():
+    """Lazy loading of pystray modules"""
+    global PYSTRAY_AVAILABLE
+    if PYSTRAY_AVAILABLE is None:
+        try:
+            from pystray import Icon, Menu, MenuItem
+            from PIL import Image, ImageDraw
+            PYSTRAY_AVAILABLE = (Icon, Menu, MenuItem, Image, ImageDraw)
+        except ImportError:
+            PYSTRAY_AVAILABLE = False
+    return PYSTRAY_AVAILABLE
 
 # Pistas para PyInstaller (hidden imports) sin ejecutar nada:
 if False:
@@ -365,6 +373,11 @@ def eliminar_tarea_programada(task_name):
 
 def crear_icono_neon():
     try:
+        pystray_modules = get_pystray_modules()
+        if not pystray_modules:
+            return None
+        Icon, Menu, MenuItem, Image, ImageDraw = pystray_modules
+        
         ico_path = resource_path("1.ico")
         if os.path.exists(ico_path):
             try:
@@ -403,7 +416,8 @@ def cerrar_optimizador_completo(icon=None, item=None):
     detener_modo_agresivo()
     detener_modo_juego()
     tray_thread_running = False
-    if tray_icon and PYSTRAY_AVAILABLE:
+    pystray_modules = get_pystray_modules()
+    if tray_icon and pystray_modules:
         try:
             tray_icon.stop()
         except:
@@ -420,9 +434,11 @@ def cerrar_optimizador_completo(icon=None, item=None):
 
 def setup_tray_icon():
     global tray_icon, tray_thread_running
-    if not PYSTRAY_AVAILABLE:
+    pystray_modules = get_pystray_modules()
+    if not pystray_modules:
         return False
     try:
+        Icon, Menu, MenuItem, Image, ImageDraw = pystray_modules
         menu = Menu(
             MenuItem("Restaurar", restaurar_ventana, default=True),
             MenuItem("Minimizar", minimizar_ventana_bandeja),

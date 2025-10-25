@@ -830,8 +830,14 @@ def restore_previous_mode(previous_mode: Optional[str]):
         print(f"ERROR restaurando modo anterior: {e}")
 
 # === CARGAR CONFIGURACIÓN ===
+# Config cache for optimization
+_config_cache = None
+_config_mtime = 0
+
 def cargar_config() -> Tuple[Set[str], Set[str], List[str], List[str]]:
-    """Carga configuración desde config.json"""
+    """Carga configuración desde config.json con caché"""
+    global _config_cache, _config_mtime
+    
     lista_blanca = set()
     lista_juegos = set()
     procesos_a_terminar = list(PROCESOS_A_DETENER_DEFAULT)
@@ -839,20 +845,29 @@ def cargar_config() -> Tuple[Set[str], Set[str], List[str], List[str]]:
     
     try:
         if os.path.exists(NOMBRE_ARCHIVO_CONFIG):
-            with open(NOMBRE_ARCHIVO_CONFIG, "r", encoding="utf-8") as f:
-                datos = json.load(f)
-                lista_blanca = set(item.lower() for item in datos.get("lista_blanca", []))
-                lista_juegos = set(item.lower() for item in datos.get("juegos", []))
-                
-                procesos_custom = datos.get("procesos_a_terminar", [])
-                if procesos_custom:
-                    procesos_a_terminar.extend([p.lower() for p in procesos_custom])
-                
-                servicios_custom = datos.get("servicios_a_detener", [])
-                if servicios_custom:
-                    servicios_a_detener.extend([s.lower() for s in servicios_custom])
+            current_mtime = os.path.getmtime(NOMBRE_ARCHIVO_CONFIG)
+            if _config_cache is None or current_mtime > _config_mtime:
+                with open(NOMBRE_ARCHIVO_CONFIG, "r", encoding="utf-8") as f:
+                    datos = json.load(f)
+                    _config_cache = datos
+                    _config_mtime = current_mtime
+            
+            lista_blanca = set(item.lower() for item in _config_cache.get("lista_blanca", []))
+            lista_juegos = set(item.lower() for item in _config_cache.get("juegos", []))
+            
+            procesos_custom = _config_cache.get("procesos_a_terminar", [])
+            if procesos_custom:
+                procesos_a_terminar.extend([p.lower() for p in procesos_custom])
+            
+            servicios_custom = _config_cache.get("servicios_a_detener", [])
+            if servicios_custom:
+                servicios_a_detener.extend([s.lower() for s in servicios_custom])
+    except (IOError, OSError, PermissionError) as e:
+        print(f"ERROR: Error de archivo config: {e}")
+    except json.JSONDecodeError as e:
+        print(f"ERROR: Error JSON en config: {e}")
     except Exception as e:
-        print(f"ERROR: No se pudo leer {NOMBRE_ARCHIVO_CONFIG}: {e}")
+        print(f"ERROR: Error inesperado leyendo config: {e}")
     
     return lista_blanca, lista_juegos, procesos_a_terminar, servicios_a_detener
 
