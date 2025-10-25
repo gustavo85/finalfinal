@@ -78,6 +78,9 @@ def check_optimization_implementations():
             'set_quantum_length',  # Scheduler quantum
             'optimize_gpu_memory_advanced',  # GPU memory management
             'monitor_thermals_and_adjust',  # Thermal monitoring
+            'PowerShellSession',  # NEW: PowerShell connection pooling
+            'get_ps_session',  # NEW: PowerShell session getter
+            'optimize_io_scheduler',  # NEW: I/O scheduler optimization
         ],
         'COPIA.py': [
             'ThreadPoolExecutor',  # Batch registry operations
@@ -89,6 +92,8 @@ def check_optimization_implementations():
         ],
         'GUI.py': [
             'get_pystray_modules',  # Lazy imports
+            '_process_cache',  # NEW: Process cache for differential updates
+            'refrescar_lista_procesos',  # GUI refresh with differential updates
         ],
         'performance_analytics.py': [
             'PerformanceAnalytics',  # Performance analytics
