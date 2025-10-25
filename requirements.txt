@@ -1,0 +1,9 @@
+# Gaming Optimizer - Python Dependencies
+# Core dependencies
+psutil>=5.9.0
+pywin32>=305
+pillow>=10.0.0
+pystray>=0.19.4
+
+# Optional dependencies for development
+# nuitka>=1.8.0  # Uncomment for building with Nuitka
